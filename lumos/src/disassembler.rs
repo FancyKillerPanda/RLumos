@@ -9,10 +9,21 @@ pub fn disassemble_chunk(c: chunk::Chunk, name: &str) {
 	while let Some((offset, instruction)) = chunk_iter.next() {
 		print!("{:04} ", offset);
 
+		if offset > 0 && c.lines[offset] == c.lines[offset - 1] {
+			print!("   | ");
+		} else {
+			print!("{:04} ", c.lines[offset]);
+		}
+
 		match instruction {
-			OpCode::Return => println!("OP_RETURN"),
+			instruction if instruction == &(OpCode::Return as usize) => println!("OP_RETURN"),
+			instruction if instruction == &(OpCode::Constant as usize) => {
+				let constant = c.code[offset + 1];
+				println!("{:-16} {:04} '{}'", "OP_CONSTANT", constant, c.constants.values[constant]);
+				chunk_iter.next();
+			}
 			_ => {
-				println!("Unknown OpCode {}", instruction as *const OpCode as u32);
+				println!("Unknown OpCode {}", instruction);
 			}
 		}
 	}
