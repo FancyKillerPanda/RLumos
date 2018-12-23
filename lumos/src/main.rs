@@ -1,7 +1,8 @@
 use lumos::chunk::*;
-use lumos::disassembler;
+use lumos::vm::VM;
 
 fn main() {
+    let mut vm = VM::new();
     let mut chunk = Chunk::new();
 
     let constant = chunk.add_constant(1.2);
@@ -10,5 +11,7 @@ fn main() {
 
     chunk.write_byte(OpCode::Return as usize, 123);
 
-    disassembler::disassemble_chunk(chunk, "Test Chunk");
+    // disassembler::disassemble_chunk(&mut chunk, "Test Chunk");
+
+    vm.interpret(chunk);
 }
