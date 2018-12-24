@@ -82,11 +82,6 @@ impl VM {
 			}
 
 			match instruction {
-				// Return
-				instruction if instruction == &(OpCode::Return as usize) => {
-					println!("{}", self.pop_stack());
-					return InterpretResult::Ok;
-				},
 				// Constant
 				instruction if instruction == &(OpCode::Constant as usize) => {
 					// Tries to find the constant instruction
@@ -108,6 +103,11 @@ impl VM {
 				instruction if instruction == &(OpCode::Negate as usize) => {
 					let val = self.pop_stack();
 					self.push_stack(-val);
+				},
+				// Return
+				instruction if instruction == &(OpCode::Return as usize) => {
+					println!("{}", self.pop_stack());
+					return InterpretResult::Ok;
 				},
 				// Unknown (should be unreachable)
 				_ => {

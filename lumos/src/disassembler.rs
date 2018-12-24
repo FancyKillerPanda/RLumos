@@ -34,10 +34,6 @@ pub fn disassemble_instruction(c: &chunk::Chunk, offset: usize, instruction: &us
 	}
 
 	match instruction {
-		// Return
-		instruction if instruction == &(OpCode::Return as usize) => {
-			println!("OP_RETURN");
-		},
 		// Constant
 		instruction if instruction == &(OpCode::Constant as usize) => {
 			let constant = c.code[offset + 1];
@@ -48,6 +44,10 @@ pub fn disassemble_instruction(c: &chunk::Chunk, offset: usize, instruction: &us
 		instruction if instruction == &(OpCode::Negate as usize) => {
 			println!("OP_NEGATE");
 		}
+		// Return
+		instruction if instruction == &(OpCode::Return as usize) => {
+			println!("OP_RETURN");
+		},
 		// Unknown (should be unreachable)
 		_ => {
 			println!("Unknown OpCode {}", instruction);
