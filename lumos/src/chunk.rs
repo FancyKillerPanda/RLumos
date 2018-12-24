@@ -2,8 +2,19 @@ use super::value;
 
 // All possible bytecode values
 pub enum OpCode {
+	// Constant
 	Constant,
+
+	// Binary Operators
+	Add,
+	Subtract,
+	Multiply,
+	Divide,
+
+	// Unary Operators
 	Negate,
+
+	// Return
 	Return,
 }
 

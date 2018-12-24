@@ -1,3 +1,4 @@
+use std::ops::{ Add, Sub, Mul, Div };
 use super::chunk::{ Chunk, OpCode };
 use super::disassembler::disassemble_instruction;
 use super::value;
@@ -13,6 +14,7 @@ pub enum InterpretResult {
 
 // Max number of elements in stack
 const STACK_MAX: usize = 256;
+
 
 // Represents the virtual machine
 pub struct VM {
@@ -81,6 +83,13 @@ impl VM {
 				disassemble_instruction(&self.chunk, offset, instruction);
 			}
 
+			// Closure for binary operators
+			let mut binary_op = |op: fn(value::Value, value::Value) -> value::Value| {
+				let b = self.pop_stack();
+				let a = self.pop_stack();
+				self.push_stack(op(a, b));
+			};
+
 			match instruction {
 				// Constant
 				instruction if instruction == &(OpCode::Constant as usize) => {
@@ -99,6 +108,12 @@ impl VM {
 					// Pushes the constant onto the stack
 					self.push_stack(constant);
 				}
+				// Binary Operators
+				instruction if instruction == &(OpCode::Add as usize) => binary_op(Add::add),
+				instruction if instruction == &(OpCode::Subtract as usize) => binary_op(Sub::sub),
+				instruction if instruction == &(OpCode::Multiply as usize) => binary_op(Mul::mul),
+				instruction if instruction == &(OpCode::Divide as usize) => binary_op(Div::div),
+
 				// Negation
 				instruction if instruction == &(OpCode::Negate as usize) => {
 					let val = self.pop_stack();

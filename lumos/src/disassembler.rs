@@ -40,6 +40,11 @@ pub fn disassemble_instruction(c: &chunk::Chunk, offset: usize, instruction: &us
 			println!("{:-16} {:04} '{}'", "OP_CONSTANT", constant, c.constants.values[constant]);
 			return 1;
 		},
+		// Binary Operators
+				instruction if instruction == &(OpCode::Add as usize) => println!("OP_ADD"),
+				instruction if instruction == &(OpCode::Subtract as usize) => println!("OP_SUBTRACT"),
+				instruction if instruction == &(OpCode::Multiply as usize) => println!("OP_MULTIPLY"),
+				instruction if instruction == &(OpCode::Divide as usize) => println!("OP_DIVIDE"),
 		// Negation
 		instruction if instruction == &(OpCode::Negate as usize) => {
 			println!("OP_NEGATE");
