@@ -43,6 +43,10 @@ pub fn disassemble_instruction(c: &chunk::Chunk, offset: usize, instruction: &us
 			let constant = c.code[offset + 1];
 			println!("{:-16} {:04} '{}'", "OP_CONSTANT", constant, c.constants.values[constant]);
 			return 1;
+		},
+		// Negation
+		instruction if instruction == &(OpCode::Negate as usize) => {
+			println!("OP_NEGATE");
 		}
 		// Unknown (should be unreachable)
 		_ => {

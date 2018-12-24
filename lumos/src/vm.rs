@@ -104,6 +104,11 @@ impl VM {
 					// Pushes the constant onto the stack
 					self.push_stack(constant);
 				}
+				// Negation
+				instruction if instruction == &(OpCode::Negate as usize) => {
+					let val = self.pop_stack();
+					self.push_stack(-val);
+				},
 				// Unknown (should be unreachable)
 				_ => {
 					return InterpretResult::CompileError;

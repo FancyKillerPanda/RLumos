@@ -3,6 +3,7 @@ use super::value;
 // All possible bytecode values
 pub enum OpCode {
 	Constant,
+	Negate,
 	Return,
 }
 
