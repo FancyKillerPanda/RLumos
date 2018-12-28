@@ -2,6 +2,7 @@ use std::ops::{ Add, Sub, Mul, Div };
 use super::chunk::{ Chunk, OpCode };
 use super::disassembler::disassemble_instruction;
 use super::value;
+use super::compiler;
 use super::DEBUG_TRACE_EXECUTION;
 
 // Result from interpretation
@@ -131,4 +132,10 @@ impl VM {
 			}
 		}
 	}
+}
+
+pub fn interpret(source: &String) -> InterpretResult {
+	compiler::compile(source);
+	
+	InterpretResult::Ok
 }
