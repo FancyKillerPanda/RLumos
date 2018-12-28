@@ -1,4 +1,6 @@
+// Represents a Scanner object
 pub struct Scanner<'a> {
+	// source_str is currently unused, may be used in future
 	source_str: &'a String,
 	source: std::slice::Iter<'a, u8>,
 	current_lex: String,
@@ -6,6 +8,7 @@ pub struct Scanner<'a> {
 }
 
 impl<'a> Scanner<'a> {
+	// Creates a new scanner
 	pub fn new(s: &'a String) -> Scanner<'a> {
 		Scanner {
 			source_str: s,
@@ -15,15 +18,18 @@ impl<'a> Scanner<'a> {
 		}
 	}
 
+	// Scans for the next token
 	pub fn scan_token(&mut self) -> Token {
 		self.skip_whitespace();
 		
+		// Resets the current lexeme
 		self.current_lex = String::new();
 		
 		if self.is_at_end() {
 			return self.make_token(TokenType::EoF);
 		}
 
+		// Moves to the next character
 		let c = self.advance();
 
 		if c.is_numeric() {
@@ -78,13 +84,16 @@ impl<'a> Scanner<'a> {
 			_ => (),
 		}
 
+		// Error if it doesn't match any previous character
 		return self.error_token("Unexpected character.");
 	}
 
+	// Returns true if the scanner has scanned the whole source string
 	fn is_at_end(&self) -> bool {
 		self.source.clone().next() == None
 	}
 
+	// Makes a regular token
 	fn make_token(&self, t: TokenType) -> Token {
 		Token {
 			type_: t,
@@ -93,6 +102,7 @@ impl<'a> Scanner<'a> {
 		}
 	}
 
+	// Makes an error token
 	fn error_token(&self, msg: &str) -> Token {
 		Token {
 			type_: TokenType::Error,
@@ -101,30 +111,30 @@ impl<'a> Scanner<'a> {
 		}
 	}
 
+	// Advances one character
 	fn advance(&mut self) -> char {
+		// Gets the next character if it exists
 		let next = match self.source.next() {
 			Some(t) => t,
 			None => return '\0',
 		};
 		
+		// Pushes that character into the current lexeme
 		let next = next.clone() as char;
-
 		self.current_lex.push(next);
+
 		next
 	}
 
+	// Checks if next character is what is expected
 	fn match_next(&mut self, expected: char) -> bool {
 		if self.is_at_end() {
 			return false;
 		}
 
-		let next = match self.source.clone().next() {
-			Some(t) => t,
-			None => return false,
-		};
-
-		if next.clone() as char == expected {
-			self.current_lex.push(next.clone() as char);
+		// Looks at the next character and compares it
+		if self.peek().clone() as char == expected {
+			self.current_lex.push(self.peek().clone() as char);
 			self.source.next();
 			return true;
 		}
@@ -132,22 +142,28 @@ impl<'a> Scanner<'a> {
 		false
 	}
 
+	// Skips whitespace and comments
 	fn skip_whitespace(&mut self) {
 		loop {
+			// Looks at the next character
 			let c = self.peek();
 
+			// Removes comments
 			if c == '/' {
 				if self.peek_next() == '/' {
+					// Comments go to the end of the line
 					while self.peek() != '\n' && !self.is_at_end() {
 						self.advance();
 					}
 				}
 			}
 
+			// Increases the line count on a newline character
 			if c == '\n' {
 				self.line += 1;
 			}
 			
+			// Continues if whitespace, stops if not
 			if c.is_whitespace() {
 				self.advance();
 			} else {
@@ -156,7 +172,9 @@ impl<'a> Scanner<'a> {
 		}
 	}
 
+	// Peeks at the next character
 	fn peek(&self) -> char {
+		// Gets next character if it exists, else returns null
 		let next = match self.source.clone().next() {
 			Some(t) => t,
 			None => return '\0',
@@ -165,10 +183,13 @@ impl<'a> Scanner<'a> {
 		next.clone() as char
 	}
 
+	// Peeks two characters ahead
 	fn peek_next(&self) -> char {
+		// Advances by one character
 		let mut s = self.source.clone();
 		s.next();
 
+		// Gets character after if it exists, else returns null
 		let next = match s.next() {
 			Some(t) => t,
 			None => return '\0',
@@ -177,8 +198,11 @@ impl<'a> Scanner<'a> {
 		next.clone() as char
 	}
 
+	// Handles string literals
 	fn string(&mut self) -> Token {
+		// While not the closing quote, advance
 		while self.peek() != '"' && !self.is_at_end() {
+			// Increments line count on newline
 			if self.peek() == '\n' {
 				self.line += 1;
 			}
@@ -186,6 +210,7 @@ impl<'a> Scanner<'a> {
 			self.advance();
 		}
 
+		// String not terminated
 		if self.is_at_end() {
 			return self.error_token("Unterminated string.");
 		}
@@ -196,7 +221,9 @@ impl<'a> Scanner<'a> {
 		self.make_token(TokenType::Str)
 	}
 
+	// Handles number literals
 	fn number(&mut self) ->  Token {
+		// While still part of the number
 		while self.peek().is_numeric() {
 			self.advance();
 		}
@@ -214,7 +241,9 @@ impl<'a> Scanner<'a> {
 		self.make_token(TokenType::Number)
 	}
 
+	// Handles identifiers
 	fn identifier(&mut self) -> Token {
+		// While any letter, number, or underscore
 		while self.peek().is_alphanumeric() || self.peek() == '_' {
 			self.advance();
 		}
@@ -222,14 +251,17 @@ impl<'a> Scanner<'a> {
 		self.make_token(self.identifier_type())
 	}
 
+	// Gets the correct type of the identifier
 	fn identifier_type(&self) -> TokenType {
+		// Gets first character of the identifier
 		let mut lex_iter = self.current_lex.as_bytes().iter();
 		let next = match lex_iter.next() {
 			Some(t) => t,
 			None => unreachable!(),
 		};
 
-		match next.clone() as char {                                  
+		// Checks if the character matches any keyword
+		match next.clone() as char {
 			'a' => return self.check_keyword(&mut lex_iter, "nd", TokenType::And),
 			'c' => return self.check_keyword(&mut lex_iter, "lass", TokenType::Class),
 			'e' => return self.check_keyword(&mut lex_iter, "lse", TokenType::Else),
@@ -270,18 +302,23 @@ impl<'a> Scanner<'a> {
 		}                                                            
 	}
 
+	// Checks if a token is a keyword
 	fn check_keyword(&self, lex_iter: &mut std::slice::Iter<u8>, rest: &str, type_: TokenType) -> TokenType {
+		// Gets an iterator over the rest of the keyword
 		let rest = String::from(rest);
 		let mut rest_iter = rest.as_bytes().iter();
 		
 		loop {
+			// Advances one character from both strings
 			let lex_next = lex_iter.next();
 			let rest_next = rest_iter.next();
 
+			// When not the same, return identifier
 			if lex_next != rest_next {
 				return TokenType::Identifier;
 			}
 
+			// If both are None they are equal
 			if lex_next == None && rest_next == None {
 				return type_;
 			}
@@ -290,12 +327,14 @@ impl<'a> Scanner<'a> {
 }
 
 
+// Represents a Token object
 pub struct Token {
 	pub type_: TokenType,
-	pub string:String,
+	pub string: String,
 	pub line: i32,
 }
 
+// Represents every type a Token can be
 #[derive(Copy, Clone)]
 pub enum TokenType {
 	// Single-character tokens

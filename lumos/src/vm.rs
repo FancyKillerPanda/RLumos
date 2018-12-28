@@ -134,7 +134,9 @@ impl VM {
 	}
 }
 
+// Interprets a source string
 pub fn interpret(source: &String) -> InterpretResult {
+	// Compiles the source
 	compiler::compile(source);
 	
 	InterpretResult::Ok
